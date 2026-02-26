@@ -1,0 +1,794 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Online Meat Mart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #f8f8f8 60%, #ffe0e0 100%);
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      color: #d32f2f;
+      font-size: 2.8em;
+      margin-top: 40px;
+      letter-spacing: 2px;
+      text-shadow: 1px 2px 8px #fff0f0;
+    }
+    .products {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 40px;
+    }
+    .product {
+      background: linear-gradient(120deg, #fff 80%, #ffe0e0 100%);
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(211,47,47,0.08);
+      padding: 28px 18px 22px 18px;
+      width: 260px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .product:hover {
+      transform: translateY(-8px) scale(1.04);
+      box-shadow: 0 12px 32px rgba(211,47,47,0.18);
+    }
+    .product img {
+      width: 200px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(211,47,47,0.08);
+    }
+    .product h2 {
+      font-size: 1.3em;
+      margin: 14px 0 7px;
+      color: #b71c1c;
+    }
+    .product p {
+      color: #555;
+      margin-bottom: 14px;
+      font-size: 1.1em;
+    }
+    .buy-btn {
+      background: linear-gradient(90deg, #d32f2f 80%, #ff5252 100%);
+      color: #fff;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.1em;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(211,47,47,0.12);
+      transition: background 0.2s;
+    }
+    .buy-btn:hover {
+      background: linear-gradient(90deg, #b71c1c 80%, #d32f2f 100%);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: auto;
+      background: rgba(0,0,0,0.45);
+    }
+    .modal-content {
+      background: #fff;
+      margin: 8% auto;
+      padding: 32px 28px 24px 28px;
+      border-radius: 16px;
+      width: 350px;
+      box-shadow: 0 8px 32px rgba(211,47,47,0.18);
+      text-align: center;
+      position: relative;
+    }
+    .close {
+      color: #d32f2f;
+      position: absolute;
+      top: 18px;
+      right: 22px;
+      font-size: 2em;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .modal label {
+      font-size: 1.1em;
+      color: #b71c1c;
+      margin-right: 8px;
+    }
+    .modal input[type="number"] {
+      width: 80px;
+      padding: 6px;
+      font-size: 1em;
+      border-radius: 4px;
+      border: 1px solid #d32f2f;
+      margin-bottom: 18px;
+    }
+    .calc-btn {
+      background: #d32f2f;
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      margin-top: 10px;
+    }
+    .calc-btn:hover { background: #b71c1c; }
+    .result {
+      margin-top: 18px;
+      font-size: 1.2em;
+      color: #388e3c;
+      font-weight: bold;
+    }
+    .order-btn {
+      display: none;
+      margin-top: 18px;
+      background: #388e3c;
+      color: #fff;
+      padding: 10px 22px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    .order-btn:hover { background: #2e7031; }
+
+    #confirmModal .modal-content {
+      animation: popUp 0.4s cubic-bezier(.68,-0.55,.27,1.55) both;
+    }
+    @keyframes popUp {
+      0% { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+      h1 { font-size: 2em; margin-top: 20px; }
+      .products { flex-direction: column; align-items: center; gap: 24px; }
+      .product { width: 90%; padding: 20px; }
+      .product img { width: 100%; height: 200px; }
+      .product h2 { font-size: 1.5em; }
+      .product p { font-size: 1.2em; }
+      .buy-btn, .benefit-btn { width: 80%; font-size: 1.1em; padding: 14px 0; }
+    }
+    @media (max-width: 480px) {
+      h1 { font-size: 1.8em; }
+      .product img { height: 220px; }
+      .product h2 { font-size: 1.4em; }
+      .product p { font-size: 1.1em; }
+      .buy-btn, .benefit-btn { font-size: 1em; }
+    }
+
+    #authBox {
+      max-width: 430px;
+      margin: 30px auto 10px auto;
+      padding: 24px 26px;
+      background:#ffffff;
+      border-radius:16px;
+      box-shadow:0 6px 24px rgba(0,0,0,0.12);
+    }
+    #authBox label {
+      display:block;
+      margin-top:10px;
+      color:#555;
+    }
+    #authBox input {
+      width:100%;
+      padding:8px;
+      margin-top:4px;
+      border-radius:6px;
+      border:1px solid #ccc;
+      font-size:1em;
+    }
+
+    #offersArea {
+      max-width: 1000px;
+      margin: 30px auto 10px auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      justify-content: center;
+    }
+    .offer-card {
+      position: relative;
+      flex: 1 1 280px;
+      min-width: 280px;
+      border-radius: 26px;
+      padding: 26px 24px;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.16);
+      overflow: hidden;
+      cursor: pointer;
+      transform: translateY(0) scale(1);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+    }
+    .offer-card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.5), transparent 55%),
+                  radial-gradient(circle at 100% 100%, rgba(255,255,255,0.4), transparent 55%);
+      opacity: 0.55;
+      mix-blend-mode: screen;
+      animation: floatGlow 8s ease-in-out infinite alternate;
+    }
+    .offer-inner {
+      position: relative;
+      z-index: 1;
+    }
+    .offer-card:hover {
+      transform: translateY(-10px) scale(1.03);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.22);
+      filter: brightness(1.05);
+    }
+    .offer-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85em;
+      font-weight: 600;
+      background: rgba(255,255,255,0.85);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+    .offer-icon {
+      display: inline-block;
+      margin-right: 8px;
+      animation: pulseIcon 1.6s ease-in-out infinite;
+    }
+    @keyframes floatGlow {
+      0%   { transform: translate(0,0); }
+      50%  { transform: translate(10px,-10px); }
+      100% { transform: translate(-10px,10px); }
+    }
+    @keyframes pulseIcon {
+      0%,100% { transform: scale(1); opacity: 0.9; }
+      50%     { transform: scale(1.18); opacity: 1; }
+    }
+    @media (max-width: 600px) {
+      #offersArea { padding: 0 12px; }
+    }
+    .overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.overlay-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+  </style>
+</head>
+<body>
+  <h1>Online Meat Mart</h1>
+  <div id="location-overlay" class="overlay">
+  <div class="overlay-box">
+    <h2>Enable your location</h2>
+    <p>We use your location only to deliver fresh meat to your address.</p>
+    <button id="btn-use-location">Use my current location</button>
+    <p>or</p>
+    <input id="manual-address" placeholder="Type your address (optional)">
+    <button id="btn-save-manual">Continue</button>
+  </div>
+</div>
+
+
+  <!-- Auth box with Login / Register -->
+  <div id="authBox">
+    <div style="display:flex;gap:8px;margin-bottom:18px;">
+      <button id="loginTab" style="flex:1;padding:10px 0;border:none;border-radius:999px;background:#d32f2f;color:#fff;font-weight:600;cursor:pointer;">
+        Login
+      </button>
+      <button id="registerTab" style="flex:1;padding:10px 0;border:none;border-radius:999px;background:#f5f5f5;color:#d32f2f;font-weight:600;cursor:pointer;">
+        Register
+      </button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginSection">
+      <h2 style="text-align:center;color:#b71c1c;margin-top:0;margin-bottom:16px;">Login</h2>
+      <label>
+        Email:
+        <input type="email" id="loginEmail" />
+      </label>
+      <label>
+        Password:
+        <input type="password" id="loginPassword" />
+      </label>
+      <button id="loginBtn" type="button" style="margin-top:16px;width:100%;background:#d32f2f;color:#fff;padding:10px;border:none;border-radius:8px;font-size:1.05em;cursor:pointer;">
+        Login
+      </button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="registerSection" style="display:none;">
+      <h2 style="text-align:center;color:#b71c1c;margin-top:0;margin-bottom:16px;">Register to Continue</h2>
+      <label>
+        Name:
+        <input type="text" id="regName" />
+      </label>
+      <label>
+        Email:
+        <input type="email" id="regEmail" />
+      </label>
+      <label>
+        Address:
+        <input type="text" id="regAddress" />
+      </label>
+      <label>
+        Password:
+        <input type="password" id="regPassword" />
+      </label>
+      <button id="registerBtn" type="button" style="margin-top:16px;width:100%;background:#d32f2f;color:#fff;padding:10px;border:none;border-radius:8px;font-size:1.05em;cursor:pointer;">
+        Register
+      </button>
+    </div>
+  </div>
+
+  <!-- Site content -->
+  <div id="siteContent" style="display:none;">
+    <div id="homepageContent" aria-label="home content">
+      <div id="offersArea">
+        <div class="offer-card" style="background:linear-gradient(180deg,#ffb74d,#f57c00);">
+          <div class="offer-inner" style="color:#fff;text-align:left;">
+            <h2 style="font-size:1.9em;margin:0 0 8px 0;font-weight:700;">Special<br>Offer!</h2>
+            <div style="margin:18px 0;padding:18px 14px;border-radius:22px;background:rgba(255,244,224,0.95);color:#c62828;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.18);">
+              <div style="font-size:1.3em;font-weight:700;line-height:1.4;">
+                Order <span style="font-size:1.4em;">5 times</span> &amp;<br>
+                Get <span style="font-size:1.6em;">30% OFF!</span>
+              </div>
+            </div>
+            <p style="font-size:0.98em;line-height:1.5;margin:0 0 10px 0;">
+              Thank you for being a loyal customer. Discount applies automatically on every <strong>5th order</strong>.
+            </p>
+            <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;font-weight:600;">
+              <span style="font-size:0.95em;">Hurry up!<br>Grab the offer now!</span>
+              <span style="background:#ffffffdd;color:#e65100;padding:8px 14px;border-radius:999px;font-size:0.9em;box-shadow:0 2px 8px rgba(0,0,0,0.22);">
+                30% Loyalty Bonus
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="offer-card" style="background:linear-gradient(180deg,#66bb6a,#2e7d32);">
+          <div class="offer-inner" style="color:#f1fff1;text-align:left;">
+            <h2 style="font-size:1.9em;margin:0 0 8px 0;font-weight:700;">Invite &amp;<br>Earn!</h2>
+            <div style="margin:18px 0;padding:18px 14px;border-radius:22px;background:rgba(232,245,233,0.96);color:#1b5e20;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.18);">
+              <div style="font-size:1.2em;font-weight:700;line-height:1.4;">
+                Invite a new user &amp;<br>
+                get <span style="font-size:1.6em;">10% OFF</span>
+              </div>
+            </div>
+            <p style="font-size:0.98em;line-height:1.5;margin:0 0 10px 0;">
+              Share your love for Meat Mart. Discount applies when your invitee places their <strong>first order</strong>.
+            </p>
+            <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;font-weight:600;">
+              <span style="font-size:0.95em;">Refer &amp;<br>Save More!</span>
+              <span style="background:#ffffffdd;color:#1b5e20;padding:8px 14px;border-radius:999px;font-size:0.9em;box-shadow:0 2px 8px rgba(0,0,0,0.22);">
+                10% Referral Reward
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:center;margin-top:24px;">
+      <button id="backHomeBtn" style="background:#ffd600;color:#d32f2f;padding:12px 32px;font-size:1.1em;border:none;border-radius:12px;box-shadow:0 2px 8px #ffd60055;cursor:pointer;font-weight:bold;display:none;">← Back to Home</button>
+    </div>
+
+    <div class="category-select" style="display:flex; justify-content:center; gap:40px; margin-top:40px;">
+      <button class="cat-btn" id="muttonBtn" style="background:#b71c1c;color:#fff;padding:18px 48px;font-size:1.3em;border:none;border-radius:12px;box-shadow:0 2px 8px #b71c1c33;cursor:pointer;transition:background 0.2s;">Mutton</button>
+      <button class="cat-btn" id="chickenBtn" style="background:#d32f2f;color:#fff;padding:18px 48px;font-size:1.3em;border:none;border-radius:12px;box-shadow:0 2px 8px #d32f2f33;cursor:pointer;transition:background 0.2s;">Chicken</button>
+    </div>
+
+    <div id="productsArea" style="margin-top:40px;"></div>
+  </div>
+
+  <!-- Order modal -->
+  <div id="buyModal" class="modal" aria-label="buy modal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <h2 id="modalProductName">Product</h2>
+      <p id="modalProductPrice">Price: ₹0.00/kg</p>
+      <label for="quantity">Select Quantity (kg):</label>
+      <input type="number" id="quantity" min="1" max="100" value="1" />
+      <br />
+      <label for="phone" style="font-size:1.1em;color:#b71c1c;">Phone Number:</label><br>
+      <input type="tel" id="phone" placeholder="Enter phone number" style="width:280px;padding:10px;margin:10px 0;border:1px solid #d32f2f;border-radius:6px;font-size:1em;" />
+      <br />
+      <button class="calc-btn" id="calcBtn">Calculate Price</button>
+      <div class="result" id="result"></div>
+      <button class="order-btn" id="orderBtn">Order Now</button>
+    </div>
+  </div>
+
+  <!-- Order confirmation modal -->
+  <div id="confirmModal" class="modal" aria-label="order confirmation">
+    <div class="modal-content" style="background: linear-gradient(120deg, #fff 80%, #e0ffe0 100%); border: 2px solid #388e3c;">
+      <span class="close" id="closeConfirm">&times;</span>
+      <img src="https://i.pinimg.com/736x/51/66/ef/5166ef17d13a1947b0f3c0903f6d5399.jpg" alt="Thank You" style="width:120px; margin-bottom:12px; border-radius:12px; box-shadow:0 2px 8px #388e3c33;">
+      <h2 style="color:#388e3c; font-size:2em; margin-bottom:10px;">Order Confirmed!</h2>
+      <div id="confirmDetails" style="font-size:1.2em; color:#333; margin-bottom:18px;"></div>
+      <div style="font-size:1.2em; color:#d32f2f; font-weight:bold; margin-bottom:10px;">We appreciate your trust in Meat Mart!</div>
+      <div style="font-size:1.1em; color:#388e3c; font-weight:bold; margin-bottom:18px;">Thank you for shopping with us. We hope you enjoy your fresh meat!</div>
+      <button id="closeConfirmBtn" style="background:#388e3c;color:#fff;padding:10px 22px;border:none;border-radius:5px;cursor:pointer;font-size:1em;">Close</button>
+    </div>
+  </div>
+
+  <!-- Registration Success Modal -->
+  <div id="regSuccessModal" class="modal" aria-label="registration success">
+    <div class="modal-content" style="width:420px; padding:36px 32px;">
+      <span class="close" id="closeRegSuccess">&times;</span>
+      <h2 style="color:#388e3c; font-size:2.1em; margin-bottom:14px;">Registration Successful!</h2>
+      <p style="font-size:1.2em; color:#444; margin-bottom:18px;">
+        Welcome to <span style="color:#d32f2f;font-weight:bold;">Online Meat Mart</span>.
+      </p>
+      <p style="font-size:1.1em; color:#555; margin-bottom:22px;">
+        You can now explore all our fresh meat products and place your orders easily.
+      </p>
+      <button id="regSuccessBtn" style="background:#388e3c;color:#fff;padding:12px 26px;border:none;border-radius:8px;font-size:1.05em;cursor:pointer;">
+        Start Shopping
+      </button>
+    </div>
+  </div>
+  <div id="payment-overlay" class="overlay" style="display:none;">
+  <div class="overlay-box">
+    <h2>Pay for your order</h2>
+    <p>Total: ₹<span id="pay-amount"></span></p>
+
+    <img src="your-upi-qr.png" alt="UPI QR" style="width:200px;height:200px;">
+
+    <p>Or pay to UPI ID:</p>
+    <p><strong>9876543210@ybl</strong></p>
+
+    <input id="upi-ref" placeholder="Enter payment reference ID (optional)">
+    <button id="btn-paid">I have paid</button>
+    <button id="btn-cancel-payment">Cancel</button>
+  </div>
+</div>
+
+
+  <script>
+    let userLocation = { latitude: null, longitude: null, address: '' };
+
+// Show overlay on page load
+window.addEventListener('load', () => {
+  document.getElementById('location-overlay').style.display = 'flex';
+});
+
+// Use my current location
+document.getElementById('btn-use-location').onclick = () => {
+  if (!navigator.geolocation) {
+    alert('Location not supported, please type your address');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userLocation.latitude = pos.coords.latitude;
+      userLocation.longitude = pos.coords.longitude;
+      // allow site
+      document.getElementById('location-overlay').style.display = 'none';
+    },
+    err => {
+      alert('Please enable location or type address.');
+    }
+  );
+};
+
+// Manual address
+document.getElementById('btn-save-manual').onclick = () => {
+  const addr = document.getElementById('manual-address').value.trim();
+  if (!addr) {
+    alert('Please type your address or enable location');
+    return;
+  }
+  userLocation.address = addr;
+  document.getElementById('location-overlay').style.display = 'none';
+};
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const authBox = document.getElementById('authBox');
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const loginSection = document.getElementById('loginSection');
+    const registerSection = document.getElementById('registerSection');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    const siteContent = document.getElementById('siteContent');
+
+    const regSuccessModal = document.getElementById('regSuccessModal');
+    const closeRegSuccess = document.getElementById('closeRegSuccess');
+    const regSuccessBtn = document.getElementById('regSuccessBtn');
+
+    // Tabs
+    loginTab.addEventListener('click', () => {
+      loginTab.style.background = '#d32f2f';
+      loginTab.style.color = '#fff';
+      registerTab.style.background = '#f5f5f5';
+      registerTab.style.color = '#d32f2f';
+      loginSection.style.display = 'block';
+      registerSection.style.display = 'none';
+    });
+
+    registerTab.addEventListener('click', () => {
+      registerTab.style.background = '#d32f2f';
+      registerTab.style.color = '#fff';
+      loginTab.style.background = '#f5f5f5';
+      loginTab.style.color = '#d32f2f';
+      loginSection.style.display = 'none';
+      registerSection.style.display = 'block';
+    });
+
+    closeRegSuccess.onclick = () => regSuccessModal.style.display = 'none';
+    regSuccessBtn.onclick = () => regSuccessModal.style.display = 'none';
+
+    // LOGIN
+    loginBtn.addEventListener('click', async () => {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+
+      if (!email || !password) {
+        alert('Please enter email and password');
+        return;
+      }
+
+      try {
+        const res = await fetch('http://localhost:3000/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          authBox.style.display = 'none';
+          siteContent.style.display = 'block';
+          alert('Welcome back, ' + (data.name || 'user'));
+        } else {
+          alert(data.error || 'Login failed');
+        }
+      } catch (err) {
+        alert('Network error – is backend running?');
+      }
+    });
+
+    // REGISTER
+    registerBtn.addEventListener('click', async () => {
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const address = document.getElementById('regAddress').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+
+      if (!name || !email || !password || !address) {
+        alert('Please fill all fields');
+        return;
+      }
+
+      try {
+        const res = await fetch('http://localhost:3000/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password, address })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          authBox.style.display = 'none';
+          siteContent.style.display = 'block';
+          regSuccessModal.style.display = 'block';
+        } else {
+          alert('Error: ' + (data.error || 'Registration failed'));
+        }
+      } catch (err) {
+        alert('Network error – is backend running?');
+      }
+    });
+
+    // Products & orders
+    const modal = document.getElementById('buyModal');
+    const closeModal = document.getElementById('closeModal');
+    const modalProductName = document.getElementById('modalProductName');
+    const modalProductPrice = document.getElementById('modalProductPrice');
+    const quantityInput = document.getElementById('quantity');
+    const phoneInput = document.getElementById('phone');
+    const calcBtn = document.getElementById('calcBtn');
+    const resultDiv = document.getElementById('result');
+    const orderBtn = document.getElementById('orderBtn');
+    let currentPrice = 0;
+
+    const productsData = {
+      mutton: [
+        { name: 'GOAT-MUTTON', price: 600, img: 'https://www.chikplaza.com/wp-content/uploads/2017/09/Mutton-Mix-Assorted-Curry-Cut_STP3627.jpg', description: 'Fresh goat mutton, perfect for all recipes.' },
+        { name: 'Mutton Boneless', price: 750, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIH1aQTYoVuYy_-NYPam9jXazJW_zeuA6OFLVkaEnfRdA2Sk2QRpUsxlsn0s_5v3OYqno&usqp=CAU', description: 'Premium boneless mutton.' },
+        { name: 'Mutton Mince', price: 600, img: 'https://www.debon.co.in/cdn/shop/products/mkeema.jpg?v=1672122040', description: 'Perfect for keema.' },
+        { name: 'Brain', price: 100, img: 'https://cdn.shopify.com/s/files/1/1117/3688/products/Fresh-Baby-Goat-Brain-Each.jpg?v=1523063395', description: 'Delicate mutton brain, rich in nutrients and flavor.' },
+        { name: 'GOAT-BOTI', price: 300, img: 'https://i.ytimg.com/vi/qMDdLxcpcVk/sddefault.jpg', description: 'Classic goat boti for spicy dishes.' },
+        { name: 'Sheep', price: 600, img: 'https://www.collinsdictionary.com/images/full/mutton_343543736.jpg', description: 'Fresh sheep meat, tender and flavorful.' },
+        { name: 'Lamb', price: 800, img: 'https://heritagefoods.com/cdn/shop/products/goat_shanks_600_600x.jpg?v=1601661385', description: 'Perfect for parties.' },
+        { name: 'GOAT-ORGANS', price: 700, img: 'https://images.royoorders.com/insecure/fit/1000/1000/ce/0/plain/https://s3.us-west-2.amazonaws.com/royoorders2.0-assets/3e89e5/prods/BLrE6kT0ywZnlDPFnFhhLjijLMSTUV8YmciwOzn8.jpg@webp', description: 'Assorted goat organs, packed with nutrients.' }
+      ],
+      chicken: [
+        { name: 'Chicken Curry Cut', price: 200, img: 'https://www.chikplaza.com/wp-content/uploads/2017/08/Chicken-Whole-Curry-Cut_STP3528.jpg', description: 'Juicy pieces for curry.' },
+        { name: 'Chicken Breast', price: 300, img: 'https://godavaricuts.com/cdn/shop/products/Godavari-Cuts-Day-1-_51-of-65.jpg?v=1682164565', description: 'Lean and healthy.' },
+        { name: 'Chicken Drumsticks', price: 180, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQR9e-Yo3oH9t0Sjq7ex7myVuOemaIS1ZReNw&s', description: 'Perfect for grilling.' },
+        { name: 'Chicken Wings', price: 150, img: 'https://baycatch.ph/cdn/shop/files/chicken-wings-sku.jpg?v=1699525776', description: 'Great for snacks.' },
+        { name: 'Chicken Thighs', price: 250, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXTic9u_7efcAzyZQ70hXteTa4YxUtrpWRk9lZZXlxENuyemSTdrsMfOegmR4qGYGfXGs&usqp=CAU', description: 'Tender and juicy.' },
+        { name: 'Chicken Liver', price: 100, img: 'https://www.oifood.in/files/products/1346736a40616fe51e9384d6ba71f5d7.jpg', description: 'Rich in iron.' }
+      ]
+    };
+
+    const productsArea = document.getElementById('productsArea');
+
+    function showProducts(category) {
+      productsArea.innerHTML = `<h2 style='color:#b71c1c; text-align:left; margin-left:60px; font-size:2em;'>${category.charAt(0).toUpperCase() + category.slice(1)} Types</h2>`;
+      const prodWrap = document.createElement('div');
+      prodWrap.className = 'products';
+      productsData[category].forEach(prod => {
+        const prodDiv = document.createElement('div');
+        prodDiv.className = 'product';
+        prodDiv.setAttribute('data-name', prod.name);
+        prodDiv.setAttribute('data-price', prod.price);
+        prodDiv.innerHTML = `
+          <img src="${prod.img}" alt="${prod.name}">
+          <h2>${prod.name}</h2>
+          <p>${prod.description}</p>
+          <p>Price: ₹${prod.price.toFixed(2)}${prod.name === 'Brain' ? '/piece' : '/kg'}</p>
+          <button class="buy-btn">Buy Now</button>
+        `;
+        prodWrap.appendChild(prodDiv);
+      });
+      productsArea.appendChild(prodWrap);
+      attachBuyNowEvents();
+    }
+
+    function attachBuyNowEvents() {
+      document.querySelectorAll('.buy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const product = btn.closest('.product');
+          const name = product.getAttribute('data-name');
+          const price = parseFloat(product.getAttribute('data-price'));
+          currentPrice = price;
+          modalProductName.textContent = name;
+          modalProductPrice.textContent = `Price: ₹${price.toFixed(2)}${name === 'Brain' ? '/piece' : '/kg'}`;
+          document.querySelector('label[for="quantity"]').textContent =
+            `Select Quantity (${name === 'Brain' ? 'piece' : 'kg'}):`;
+          quantityInput.value = 1;
+          resultDiv.textContent = '';
+          orderBtn.style.display = 'none';
+          phoneInput.value = '';
+          modal.style.display = 'block';
+        });
+      });
+    }
+
+    closeModal.addEventListener('click', () => { modal.style.display = 'none'; });
+
+    window.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+      if (e.target === document.getElementById('confirmModal')) document.getElementById('confirmModal').style.display = 'none';
+      if (e.target === regSuccessModal) regSuccessModal.style.display = 'none';
+    });
+
+    calcBtn.addEventListener('click', () => {
+      const qty = parseInt(quantityInput.value, 10);
+      if (isNaN(qty) || qty < 1) {
+        resultDiv.textContent = 'Please enter a valid quantity.';
+        resultDiv.style.color = '#d32f2f';
+        orderBtn.style.display = 'none';
+        return;
+      }
+      const total = qty * currentPrice;
+      const unit = modalProductName.textContent === 'Brain' ? 'piece' : 'kg';
+      resultDiv.textContent = `Total Price for ${qty} ${unit}: ₹${total.toFixed(2)}`;
+      resultDiv.style.color = '#388e3c';
+      orderBtn.style.display = 'inline-block';
+
+      orderBtn.onclick = async () => {
+        const phone = phoneInput.value.trim();
+        if (!phone) return alert('Please enter phone number');
+
+        const orderData = {
+          product: modalProductName.textContent,
+          quantity: qty,
+          total: total,
+          phone: phone
+        };
+
+        try {
+          const response = await fetch('http://localhost:3000/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+          });
+          if (response.ok) {
+            modal.style.display = 'none';
+            const confirmModal = document.getElementById('confirmModal');
+            const confirmDetails = document.getElementById('confirmDetails');
+            const totalValue = total.toFixed(2);
+            confirmDetails.innerHTML = `You ordered <span style='color:#d32f2f;font-weight:bold;'>${qty} ${unit}</span> for <span style='color:#388e3c;font-weight:bold;'>₹${totalValue}</span>.<br>Phone: <span style='color:#b71c1c;font-weight:bold;'>${phone}</span>`;
+            confirmModal.style.display = 'block';
+          } else {
+            alert('Error saving order');
+          }
+        } catch (error) {
+          alert('Network error - make sure backend is running on port 3000');
+        }
+      };
+    });
+
+    document.getElementById('closeConfirm').onclick = () => {
+      document.getElementById('confirmModal').style.display = 'none';
+    };
+    document.getElementById('closeConfirmBtn').onclick = () => {
+      document.getElementById('confirmModal').style.display = 'none';
+    };
+
+    const backHomeBtn = document.getElementById('backHomeBtn');
+    function hideHomepage() {
+      document.getElementById('homepageContent').style.display = 'none';
+      backHomeBtn.style.display = 'inline-block';
+    }
+    function showHomepage() {
+      document.getElementById('homepageContent').style.display = '';
+      backHomeBtn.style.display = 'none';
+      productsArea.innerHTML = '';
+    }
+
+    document.getElementById('muttonBtn').onclick = () => { hideHomepage(); showProducts('mutton'); };
+    document.getElementById('chickenBtn').onclick = () => { hideHomepage(); showProducts('chicken'); };
+    backHomeBtn.onclick = showHomepage;
+  });
+  let pendingOrderData = null;
+
+function openPaymentPopup(orderData) {
+  pendingOrderData = orderData;
+  document.getElementById('pay-amount').textContent = orderData.total_price;
+  document.getElementById('payment-overlay').style.display = 'flex';
+}
+
+document.getElementById('btn-cancel-payment').onclick = () => {
+  pendingOrderData = null;
+  document.getElementById('payment-overlay').style.display = 'none';
+};
+
+document.getElementById('btn-paid').onclick = async () => {
+  if (!pendingOrderData) return;
+
+  const ref = document.getElementById('upi-ref').value.trim();
+  pendingOrderData.upi_reference = ref;
+  pendingOrderData.latitude = userLocation.latitude;
+  pendingOrderData.longitude = userLocation.longitude;
+  pendingOrderData.address = userLocation.address;
+
+  const res = await fetch('http://localhost:3000/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(pendingOrderData)
+  });
+  const data = await res.json();
+  alert(data.message || 'Order placed');
+  document.getElementById('payment-overlay').style.display = 'none';
+  pendingOrderData = null;
+};
+const orderData = { product_name, quantity, total_price, phone };
+openPaymentPopup(orderData);
+
+  </script>
+</body>
+</html>
