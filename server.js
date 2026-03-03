@@ -8,11 +8,21 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));  // added
 
+// MySQL connection using environment variables
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'jam8910',
-  database: 'meatmart_db'
+  host: process.env.DB_HOST,          // e.g. sql202.infinityfree.com
+  user: process.env.DB_USER,          // e.g. if0_41291596
+  password: process.env.DB_PASS,      // your InfinityFree MySQL password
+  database: process.env.DB_NAME,      // e.g. if0_41291596_meatmart
+  port: process.env.DB_PORT || 3306
+});
+
+db.connect((err) => {
+  if (err) {
+    console.error('DB connection failed:', err);
+    process.exit(1);                  // stop app if DB not reachable
+  }
+  console.log('Connected to MySQL (InfinityFree)');
 });
 
 // REGISTER route
