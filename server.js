@@ -1,5 +1,5 @@
 const express = require('express');
-const mysql = require('mysql2');
+const { Pool } = require('pg');
 const cors = require('cors');
 const path = require('path');   // added
 
@@ -8,11 +8,19 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));  // added
 
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'jam8910',
-  database: 'meatmart_db'
+// Postgres connection using DATABASE_URL from Render
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+db.connect((err, client, release) => {
+  if (err) {
+    console.error('DB connection failed:', err);
+    process.exit(1);                  // stop app if DB not reachable
+  }
+  console.log('Connected to Postgres (Render)');
+  release();
 });
 
 // REGISTER route
@@ -23,16 +31,17 @@ app.post('/register', (req, res) => {
   }
 
   db.query(
-    'INSERT INTO users (name, email, address, password) VALUES (?, ?, ?, ?)',
+    'INSERT INTO users (name, email, address, password) VALUES ($1, $2, $3, $4) RETURNING id',
     [name, email, address, password],
     (err, result) => {
       if (err) {
-        if (err.code === 'ER_DUP_ENTRY') {
+        // 23505 = unique_violation in Postgres (use this if email column is UNIQUE)
+        if (err.code === '23505') {
           return res.status(400).json({ error: 'Email already registered' });
         }
         return res.status(500).json({ error: err.message });
       }
-      res.json({ success: true, userId: result.insertId });
+      res.json({ success: true, userId: result.rows[0].id });
     }
   );
 });
@@ -45,14 +54,18 @@ app.post('/login', (req, res) => {
   }
 
   db.query(
-    'SELECT id, name FROM users WHERE email = ? AND password = ?',
+    'SELECT id, name FROM users WHERE email = $1 AND password = $2',
     [email, password],
-    (err, rows) => {
+    (err, result) => {
       if (err) return res.status(500).json({ error: err.message });
-      if (rows.length === 0) {
+      if (result.rows.length === 0) {
         return res.status(401).json({ error: 'Invalid email or password' });
       }
-      res.json({ success: true, userId: rows[0].id, name: rows[0].name });
+      res.json({
+        success: true,
+        userId: result.rows[0].id,
+        name: result.rows[0].name
+      });
     }
   );
 });
@@ -61,7 +74,7 @@ app.post('/login', (req, res) => {
 app.post('/orders', (req, res) => {
   const { product, quantity, total, phone } = req.body;
   db.query(
-    'INSERT INTO orders (product_name, quantity, total_price, phone) VALUES (?, ?, ?, ?)',
+    'INSERT INTO orders (product_name, quantity, total_price, phone) VALUES ($1, $2, $3, $4)',
     [product, quantity, total, phone],
     (err) => {
       if (err) return res.status(500).json({ error: err.message });
