@@ -1,12 +1,17 @@
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
-const path = require('path');   // added
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));  // added
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve frontend for root URL
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Postgres connection using DATABASE_URL from Render
 const db = new Pool({
@@ -17,7 +22,7 @@ const db = new Pool({
 db.connect((err, client, release) => {
   if (err) {
     console.error('DB connection failed:', err);
-    process.exit(1);                  // stop app if DB not reachable
+    process.exit(1); // stop app if DB not reachable
   }
   console.log('Connected to Postgres (Render)');
   release();
@@ -35,7 +40,6 @@ app.post('/register', (req, res) => {
     [name, email, address, password],
     (err, result) => {
       if (err) {
-        // 23505 = unique_violation in Postgres (use this if email column is UNIQUE)
         if (err.code === '23505') {
           return res.status(400).json({ error: 'Email already registered' });
         }
