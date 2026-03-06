@@ -7,8 +7,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from /public (index.html will be used for "/")
+// Serve static files from /public
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Explicit root route so "/" always works
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Postgres connection using DATABASE_URL from Render
 const db = new Pool({
