@@ -257,38 +257,36 @@
       #offersArea { padding: 0 12px; }
     }
     .overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-.overlay-box {
-  background: #fff;
-  padding: 20px;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 400px;
-  text-align: center;
-}
-
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .overlay-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <h1>Online Meat Mart</h1>
   <div id="location-overlay" class="overlay">
-  <div class="overlay-box">
-    <h2>Enable your location</h2>
-    <p>We use your location only to deliver fresh meat to your address.</p>
-    <button id="btn-use-location">Use my current location</button>
-    <p>or</p>
-    <input id="manual-address" placeholder="Type your address (optional)">
-    <button id="btn-save-manual">Continue</button>
+    <div class="overlay-box">
+      <h2>Enable your location</h2>
+      <p>We use your location only to deliver fresh meat to your address.</p>
+      <button id="btn-use-location">Use my current location</button>
+      <p>or</p>
+      <input id="manual-address" placeholder="Type your address (optional)">
+      <button id="btn-save-manual">Continue</button>
+    </div>
   </div>
-</div>
-
 
   <!-- Auth box with Login / Register -->
   <div id="authBox">
@@ -449,346 +447,349 @@
       </button>
     </div>
   </div>
+
   <div id="payment-overlay" class="overlay" style="display:none;">
-  <div class="overlay-box">
-    <h2>Pay for your order</h2>
-    <p>Total: ₹<span id="pay-amount"></span></p>
+    <div class="overlay-box">
+      <h2>Pay for your order</h2>
+      <p>Total: ₹<span id="pay-amount"></span></p>
 
-    <img src="your-upi-qr.png" alt="UPI QR" style="width:200px;height:200px;">
+      <img src="your-upi-qr.png" alt="UPI QR" style="width:200px;height:200px;">
 
-    <p>Or pay to UPI ID:</p>
-    <p><strong>9876543210@ybl</strong></p>
+      <p>Or pay to UPI ID:</p>
+      <p><strong>9876543210@ybl</strong></p>
 
-    <input id="upi-ref" placeholder="Enter payment reference ID (optional)">
-    <button id="btn-paid">I have paid</button>
-    <button id="btn-cancel-payment">Cancel</button>
+      <input id="upi-ref" placeholder="Enter payment reference ID (optional)">
+      <button id="btn-paid">I have paid</button>
+      <button id="btn-cancel-payment">Cancel</button>
+    </div>
   </div>
-</div>
-
 
   <script>
+    const API_BASE = 'https://onlinemeatmart.onrender.com';
+
     let userLocation = { latitude: null, longitude: null, address: '' };
 
-// Show overlay on page load
-window.addEventListener('load', () => {
-  document.getElementById('location-overlay').style.display = 'flex';
-});
-
-// Use my current location
-document.getElementById('btn-use-location').onclick = () => {
-  if (!navigator.geolocation) {
-    alert('Location not supported, please type your address');
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      userLocation.latitude = pos.coords.latitude;
-      userLocation.longitude = pos.coords.longitude;
-      // allow site
-      document.getElementById('location-overlay').style.display = 'none';
-    },
-    err => {
-      alert('Please enable location or type address.');
-    }
-  );
-};
-
-// Manual address
-document.getElementById('btn-save-manual').onclick = () => {
-  const addr = document.getElementById('manual-address').value.trim();
-  if (!addr) {
-    alert('Please type your address or enable location');
-    return;
-  }
-  userLocation.address = addr;
-  document.getElementById('location-overlay').style.display = 'none';
-};
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const authBox = document.getElementById('authBox');
-    const loginTab = document.getElementById('loginTab');
-    const registerTab = document.getElementById('registerTab');
-    const loginSection = document.getElementById('loginSection');
-    const registerSection = document.getElementById('registerSection');
-    const loginBtn = document.getElementById('loginBtn');
-    const registerBtn = document.getElementById('registerBtn');
-    const siteContent = document.getElementById('siteContent');
-
-    const regSuccessModal = document.getElementById('regSuccessModal');
-    const closeRegSuccess = document.getElementById('closeRegSuccess');
-    const regSuccessBtn = document.getElementById('regSuccessBtn');
-
-    // Tabs
-    loginTab.addEventListener('click', () => {
-      loginTab.style.background = '#d32f2f';
-      loginTab.style.color = '#fff';
-      registerTab.style.background = '#f5f5f5';
-      registerTab.style.color = '#d32f2f';
-      loginSection.style.display = 'block';
-      registerSection.style.display = 'none';
+    // Show overlay on page load
+    window.addEventListener('load', () => {
+      document.getElementById('location-overlay').style.display = 'flex';
     });
 
-    registerTab.addEventListener('click', () => {
-      registerTab.style.background = '#d32f2f';
-      registerTab.style.color = '#fff';
-      loginTab.style.background = '#f5f5f5';
-      loginTab.style.color = '#d32f2f';
-      loginSection.style.display = 'none';
-      registerSection.style.display = 'block';
-    });
-
-    closeRegSuccess.onclick = () => regSuccessModal.style.display = 'none';
-    regSuccessBtn.onclick = () => regSuccessModal.style.display = 'none';
-
-    // LOGIN
-    loginBtn.addEventListener('click', async () => {
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value.trim();
-
-      if (!email || !password) {
-        alert('Please enter email and password');
+    // Use my current location
+    document.getElementById('btn-use-location').onclick = () => {
+      if (!navigator.geolocation) {
+        alert('Location not supported, please type your address');
         return;
       }
-
-      try {
-        const res = await fetch('http://localhost:3000/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          authBox.style.display = 'none';
-          siteContent.style.display = 'block';
-          alert('Welcome back, ' + (data.name || 'user'));
-        } else {
-          alert(data.error || 'Login failed');
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          userLocation.latitude = pos.coords.latitude;
+          userLocation.longitude = pos.coords.longitude;
+          document.getElementById('location-overlay').style.display = 'none';
+        },
+        err => {
+          alert('Please enable location or type address.');
         }
-      } catch (err) {
-        alert('Network error – is backend running?');
-      }
-    });
-
-    // REGISTER
-    registerBtn.addEventListener('click', async () => {
-      const name = document.getElementById('regName').value.trim();
-      const email = document.getElementById('regEmail').value.trim();
-      const address = document.getElementById('regAddress').value.trim();
-      const password = document.getElementById('regPassword').value.trim();
-
-      if (!name || !email || !password || !address) {
-        alert('Please fill all fields');
-        return;
-      }
-
-      try {
-        const res = await fetch('http://localhost:3000/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password, address })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          authBox.style.display = 'none';
-          siteContent.style.display = 'block';
-          regSuccessModal.style.display = 'block';
-        } else {
-          alert('Error: ' + (data.error || 'Registration failed'));
-        }
-      } catch (err) {
-        alert('Network error – is backend running?');
-      }
-    });
-
-    // Products & orders
-    const modal = document.getElementById('buyModal');
-    const closeModal = document.getElementById('closeModal');
-    const modalProductName = document.getElementById('modalProductName');
-    const modalProductPrice = document.getElementById('modalProductPrice');
-    const quantityInput = document.getElementById('quantity');
-    const phoneInput = document.getElementById('phone');
-    const calcBtn = document.getElementById('calcBtn');
-    const resultDiv = document.getElementById('result');
-    const orderBtn = document.getElementById('orderBtn');
-    let currentPrice = 0;
-
-    const productsData = {
-      mutton: [
-        { name: 'GOAT-MUTTON', price: 600, img: 'https://www.chikplaza.com/wp-content/uploads/2017/09/Mutton-Mix-Assorted-Curry-Cut_STP3627.jpg', description: 'Fresh goat mutton, perfect for all recipes.' },
-        { name: 'Mutton Boneless', price: 750, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIH1aQTYoVuYy_-NYPam9jXazJW_zeuA6OFLVkaEnfRdA2Sk2QRpUsxlsn0s_5v3OYqno&usqp=CAU', description: 'Premium boneless mutton.' },
-        { name: 'Mutton Mince', price: 600, img: 'https://www.debon.co.in/cdn/shop/products/mkeema.jpg?v=1672122040', description: 'Perfect for keema.' },
-        { name: 'Brain', price: 100, img: 'https://cdn.shopify.com/s/files/1/1117/3688/products/Fresh-Baby-Goat-Brain-Each.jpg?v=1523063395', description: 'Delicate mutton brain, rich in nutrients and flavor.' },
-        { name: 'GOAT-BOTI', price: 300, img: 'https://i.ytimg.com/vi/qMDdLxcpcVk/sddefault.jpg', description: 'Classic goat boti for spicy dishes.' },
-        { name: 'Sheep', price: 600, img: 'https://www.collinsdictionary.com/images/full/mutton_343543736.jpg', description: 'Fresh sheep meat, tender and flavorful.' },
-        { name: 'Lamb', price: 800, img: 'https://heritagefoods.com/cdn/shop/products/goat_shanks_600_600x.jpg?v=1601661385', description: 'Perfect for parties.' },
-        { name: 'GOAT-ORGANS', price: 700, img: 'https://images.royoorders.com/insecure/fit/1000/1000/ce/0/plain/https://s3.us-west-2.amazonaws.com/royoorders2.0-assets/3e89e5/prods/BLrE6kT0ywZnlDPFnFhhLjijLMSTUV8YmciwOzn8.jpg@webp', description: 'Assorted goat organs, packed with nutrients.' }
-      ],
-      chicken: [
-        { name: 'Chicken Curry Cut', price: 200, img: 'https://www.chikplaza.com/wp-content/uploads/2017/08/Chicken-Whole-Curry-Cut_STP3528.jpg', description: 'Juicy pieces for curry.' },
-        { name: 'Chicken Breast', price: 300, img: 'https://godavaricuts.com/cdn/shop/products/Godavari-Cuts-Day-1-_51-of-65.jpg?v=1682164565', description: 'Lean and healthy.' },
-        { name: 'Chicken Drumsticks', price: 180, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQR9e-Yo3oH9t0Sjq7ex7myVuOemaIS1ZReNw&s', description: 'Perfect for grilling.' },
-        { name: 'Chicken Wings', price: 150, img: 'https://baycatch.ph/cdn/shop/files/chicken-wings-sku.jpg?v=1699525776', description: 'Great for snacks.' },
-        { name: 'Chicken Thighs', price: 250, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXTic9u_7efcAzyZQ70hXteTa4YxUtrpWRk9lZZXlxENuyemSTdrsMfOegmR4qGYGfXGs&usqp=CAU', description: 'Tender and juicy.' },
-        { name: 'Chicken Liver', price: 100, img: 'https://www.oifood.in/files/products/1346736a40616fe51e9384d6ba71f5d7.jpg', description: 'Rich in iron.' }
-      ]
+      );
     };
 
-    const productsArea = document.getElementById('productsArea');
-
-    function showProducts(category) {
-      productsArea.innerHTML = `<h2 style='color:#b71c1c; text-align:left; margin-left:60px; font-size:2em;'>${category.charAt(0).toUpperCase() + category.slice(1)} Types</h2>`;
-      const prodWrap = document.createElement('div');
-      prodWrap.className = 'products';
-      productsData[category].forEach(prod => {
-        const prodDiv = document.createElement('div');
-        prodDiv.className = 'product';
-        prodDiv.setAttribute('data-name', prod.name);
-        prodDiv.setAttribute('data-price', prod.price);
-        prodDiv.innerHTML = `
-          <img src="${prod.img}" alt="${prod.name}">
-          <h2>${prod.name}</h2>
-          <p>${prod.description}</p>
-          <p>Price: ₹${prod.price.toFixed(2)}${prod.name === 'Brain' ? '/piece' : '/kg'}</p>
-          <button class="buy-btn">Buy Now</button>
-        `;
-        prodWrap.appendChild(prodDiv);
-      });
-      productsArea.appendChild(prodWrap);
-      attachBuyNowEvents();
-    }
-
-    function attachBuyNowEvents() {
-      document.querySelectorAll('.buy-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const product = btn.closest('.product');
-          const name = product.getAttribute('data-name');
-          const price = parseFloat(product.getAttribute('data-price'));
-          currentPrice = price;
-          modalProductName.textContent = name;
-          modalProductPrice.textContent = `Price: ₹${price.toFixed(2)}${name === 'Brain' ? '/piece' : '/kg'}`;
-          document.querySelector('label[for="quantity"]').textContent =
-            `Select Quantity (${name === 'Brain' ? 'piece' : 'kg'}):`;
-          quantityInput.value = 1;
-          resultDiv.textContent = '';
-          orderBtn.style.display = 'none';
-          phoneInput.value = '';
-          modal.style.display = 'block';
-        });
-      });
-    }
-
-    closeModal.addEventListener('click', () => { modal.style.display = 'none'; });
-
-    window.addEventListener('click', (e) => {
-      if (e.target === modal) modal.style.display = 'none';
-      if (e.target === document.getElementById('confirmModal')) document.getElementById('confirmModal').style.display = 'none';
-      if (e.target === regSuccessModal) regSuccessModal.style.display = 'none';
-    });
-
-    calcBtn.addEventListener('click', () => {
-      const qty = parseInt(quantityInput.value, 10);
-      if (isNaN(qty) || qty < 1) {
-        resultDiv.textContent = 'Please enter a valid quantity.';
-        resultDiv.style.color = '#d32f2f';
-        orderBtn.style.display = 'none';
+    // Manual address
+    document.getElementById('btn-save-manual').onclick = () => {
+      const addr = document.getElementById('manual-address').value.trim();
+      if (!addr) {
+        alert('Please type your address or enable location');
         return;
       }
-      const total = qty * currentPrice;
-      const unit = modalProductName.textContent === 'Brain' ? 'piece' : 'kg';
-      resultDiv.textContent = `Total Price for ${qty} ${unit}: ₹${total.toFixed(2)}`;
-      resultDiv.style.color = '#388e3c';
-      orderBtn.style.display = 'inline-block';
+      userLocation.address = addr;
+      document.getElementById('location-overlay').style.display = 'none';
+    };
 
-      orderBtn.onclick = async () => {
-        const phone = phoneInput.value.trim();
-        if (!phone) return alert('Please enter phone number');
+    document.addEventListener('DOMContentLoaded', () => {
+      const authBox = document.getElementById('authBox');
+      const loginTab = document.getElementById('loginTab');
+      const registerTab = document.getElementById('registerTab');
+      const loginSection = document.getElementById('loginSection');
+      const registerSection = document.getElementById('registerSection');
+      const loginBtn = document.getElementById('loginBtn');
+      const registerBtn = document.getElementById('registerBtn');
+      const siteContent = document.getElementById('siteContent');
 
-        const orderData = {
-          product: modalProductName.textContent,
-          quantity: qty,
-          total: total,
-          phone: phone
-        };
+      const regSuccessModal = document.getElementById('regSuccessModal');
+      const closeRegSuccess = document.getElementById('closeRegSuccess');
+      const regSuccessBtn = document.getElementById('regSuccessBtn');
+
+      // Tabs
+      loginTab.addEventListener('click', () => {
+        loginTab.style.background = '#d32f2f';
+        loginTab.style.color = '#fff';
+        registerTab.style.background = '#f5f5f5';
+        registerTab.style.color = '#d32f2f';
+        loginSection.style.display = 'block';
+        registerSection.style.display = 'none';
+      });
+
+      registerTab.addEventListener('click', () => {
+        registerTab.style.background = '#d32f2f';
+        registerTab.style.color = '#fff';
+        loginTab.style.background = '#f5f5f5';
+        loginTab.style.color = '#d32f2f';
+        loginSection.style.display = 'none';
+        registerSection.style.display = 'block';
+      });
+
+      closeRegSuccess.onclick = () => regSuccessModal.style.display = 'none';
+      regSuccessBtn.onclick = () => regSuccessModal.style.display = 'none';
+
+      // LOGIN
+      loginBtn.addEventListener('click', async () => {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+
+        if (!email || !password) {
+          alert('Please enter email and password');
+          return;
+        }
 
         try {
-          const response = await fetch('http://localhost:3000/orders', {
+          const res = await fetch(`${API_BASE}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
+            body: JSON.stringify({ email, password })
           });
-          if (response.ok) {
-            modal.style.display = 'none';
-            const confirmModal = document.getElementById('confirmModal');
-            const confirmDetails = document.getElementById('confirmDetails');
-            const totalValue = total.toFixed(2);
-            confirmDetails.innerHTML = `You ordered <span style='color:#d32f2f;font-weight:bold;'>${qty} ${unit}</span> for <span style='color:#388e3c;font-weight:bold;'>₹${totalValue}</span>.<br>Phone: <span style='color:#b71c1c;font-weight:bold;'>${phone}</span>`;
-            confirmModal.style.display = 'block';
+          const data = await res.json();
+          if (res.ok) {
+            authBox.style.display = 'none';
+            siteContent.style.display = 'block';
+            alert('Welcome back, ' + (data.name || 'user'));
           } else {
-            alert('Error saving order');
+            alert(data.error || 'Login failed');
           }
-        } catch (error) {
-          alert('Network error - make sure backend is running on port 3000');
+        } catch (err) {
+          alert('Network error – is backend running?');
         }
+      });
+
+      // REGISTER
+      registerBtn.addEventListener('click', async () => {
+        const name = document.getElementById('regName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const address = document.getElementById('regAddress').value.trim();
+        const password = document.getElementById('regPassword').value.trim();
+
+        if (!name || !email || !password || !address) {
+          alert('Please fill all fields');
+          return;
+        }
+
+        try {
+          const res = await fetch(`${API_BASE}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password, address })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            authBox.style.display = 'none';
+            siteContent.style.display = 'block';
+            regSuccessModal.style.display = 'block';
+          } else {
+            alert('Error: ' + (data.error || 'Registration failed'));
+          }
+        } catch (err) {
+          alert('Network error – is backend running?');
+        }
+      });
+
+      // Products & orders
+      const modal = document.getElementById('buyModal');
+      const closeModal = document.getElementById('closeModal');
+      const modalProductName = document.getElementById('modalProductName');
+      const modalProductPrice = document.getElementById('modalProductPrice');
+      const quantityInput = document.getElementById('quantity');
+      const phoneInput = document.getElementById('phone');
+      const calcBtn = document.getElementById('calcBtn');
+      const resultDiv = document.getElementById('result');
+      const orderBtn = document.getElementById('orderBtn');
+      let currentPrice = 0;
+
+      const productsData = {
+        mutton: [
+          { name: 'GOAT-MUTTON', price: 600, img: 'https://www.chikplaza.com/wp-content/uploads/2017/09/Mutton-Mix-Assorted-Curry-Cut_STP3627.jpg', description: 'Fresh goat mutton, perfect for all recipes.' },
+          { name: 'Mutton Boneless', price: 750, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIH1aQTYoVuYy_-NYPam9jXazJW_zeuA6OFLVkaEnfRdA2Sk2QRpUsxlsn0s_5v3OYqno&usqp=CAU', description: 'Premium boneless mutton.' },
+          { name: 'Mutton Mince', price: 600, img: 'https://www.debon.co.in/cdn/shop/products/mkeema.jpg?v=1672122040', description: 'Perfect for keema.' },
+          { name: 'Brain', price: 100, img: 'https://cdn.shopify.com/s/files/1/1117/3688/products/Fresh-Baby-Goat-Brain-Each.jpg?v=1523063395', description: 'Delicate mutton brain, rich in nutrients and flavor.' },
+          { name: 'GOAT-BOTI', price: 300, img: 'https://i.ytimg.com/vi/qMDdLxcpcVk/sddefault.jpg', description: 'Classic goat boti for spicy dishes.' },
+          { name: 'Sheep', price: 600, img: 'https://www.collinsdictionary.com/images/full/mutton_343543736.jpg', description: 'Fresh sheep meat, tender and flavorful.' },
+          { name: 'Lamb', price: 800, img: 'https://heritagefoods.com/cdn/shop/products/goat_shanks_600_600x.jpg?v=1601661385', description: 'Perfect for parties.' },
+          { name: 'GOAT-ORGANS', price: 700, img: 'https://images.royoorders.com/insecure/fit/1000/1000/ce/0/plain/https://s3.us-west-2.amazonaws.com/royoorders2.0-assets/3e89e5/prods/BLrE6kT0ywZnlDPFnFhhLjijLMSTUV8YmciwOzn8.jpg@webp', description: 'Assorted goat organs, packed with nutrients.' }
+        ],
+        chicken: [
+          { name: 'Chicken Curry Cut', price: 200, img: 'https://www.chikplaza.com/wp-content/uploads/2017/08/Chicken-Whole-Curry-Cut_STP3528.jpg', description: 'Juicy pieces for curry.' },
+          { name: 'Chicken Breast', price: 300, img: 'https://godavaricuts.com/cdn/shop/products/Godavari-Cuts-Day-1-_51-of-65.jpg?v=1682164565', description: 'Lean and healthy.' },
+          { name: 'Chicken Drumsticks', price: 180, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQR9e-Yo3oH9t0Sjq7ex7myVuOemaIS1ZReNw&s', description: 'Perfect for grilling.' },
+          { name: 'Chicken Wings', price: 150, img: 'https://baycatch.ph/cdn/shop/files/chicken-wings-sku.jpg?v=1699525776', description: 'Great for snacks.' },
+          { name: 'Chicken Thighs', price: 250, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRXTic9u_7efcAzyZQ70hXteTa4YxUtrpWRk9lZZXlxENuyemSTdrsMfOegmR4qGYGfXGs&usqp=CAU', description: 'Tender and juicy.' },
+          { name: 'Chicken Liver', price: 100, img: 'https://www.oifood.in/files/products/1346736a40616fe51e9384d6ba71f5d7.jpg', description: 'Rich in iron.' }
+        ]
       };
+
+      const productsArea = document.getElementById('productsArea');
+
+      function showProducts(category) {
+        productsArea.innerHTML = `<h2 style='color:#b71c1c; text-align:left; margin-left:60px; font-size:2em;'>${category.charAt(0).toUpperCase() + category.slice(1)} Types</h2>`;
+        const prodWrap = document.createElement('div');
+        prodWrap.className = 'products';
+        productsData[category].forEach(prod => {
+          const prodDiv = document.createElement('div');
+          prodDiv.className = 'product';
+          prodDiv.setAttribute('data-name', prod.name);
+          prodDiv.setAttribute('data-price', prod.price);
+          prodDiv.innerHTML = `
+            <img src="${prod.img}" alt="${prod.name}">
+            <h2>${prod.name}</h2>
+            <p>${prod.description}</p>
+            <p>Price: ₹${prod.price.toFixed(2)}${prod.name === 'Brain' ? '/piece' : '/kg'}</p>
+            <button class="buy-btn">Buy Now</button>
+          `;
+          prodWrap.appendChild(prodDiv);
+        });
+        productsArea.appendChild(prodWrap);
+        attachBuyNowEvents();
+      }
+
+      function attachBuyNowEvents() {
+        document.querySelectorAll('.buy-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const product = btn.closest('.product');
+            const name = product.getAttribute('data-name');
+            const price = parseFloat(product.getAttribute('data-price'));
+            currentPrice = price;
+            modalProductName.textContent = name;
+            modalProductPrice.textContent = `Price: ₹${price.toFixed(2)}${name === 'Brain' ? '/piece' : '/kg'}`;
+            document.querySelector('label[for="quantity"]').textContent =
+              `Select Quantity (${name === 'Brain' ? 'piece' : 'kg'}):`;
+            quantityInput.value = 1;
+            resultDiv.textContent = '';
+            orderBtn.style.display = 'none';
+            phoneInput.value = '';
+            modal.style.display = 'block';
+          });
+        });
+      }
+
+      closeModal.addEventListener('click', () => { modal.style.display = 'none'; });
+
+      window.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+        if (e.target === document.getElementById('confirmModal')) document.getElementById('confirmModal').style.display = 'none';
+        if (e.target === regSuccessModal) regSuccessModal.style.display = 'none';
+      });
+
+      calcBtn.addEventListener('click', () => {
+        const qty = parseInt(quantityInput.value, 10);
+        if (isNaN(qty) || qty < 1) {
+          resultDiv.textContent = 'Please enter a valid quantity.';
+          resultDiv.style.color = '#d32f2f';
+          orderBtn.style.display = 'none';
+          return;
+        }
+        const total = qty * currentPrice;
+        const unit = modalProductName.textContent === 'Brain' ? 'piece' : 'kg';
+        resultDiv.textContent = `Total Price for ${qty} ${unit}: ₹${total.toFixed(2)}`;
+        resultDiv.style.color = '#388e3c';
+        orderBtn.style.display = 'inline-block';
+
+        orderBtn.onclick = async () => {
+          const phone = phoneInput.value.trim();
+          if (!phone) return alert('Please enter phone number');
+
+          const orderData = {
+            product: modalProductName.textContent,
+            quantity: qty,
+            total: total,
+            phone: phone
+          };
+
+          try {
+            const response = await fetch(`${API_BASE}/orders`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(orderData)
+            });
+            if (response.ok) {
+              modal.style.display = 'none';
+              const confirmModal = document.getElementById('confirmModal');
+              const confirmDetails = document.getElementById('confirmDetails');
+              const totalValue = total.toFixed(2);
+              confirmDetails.innerHTML = `You ordered <span style='color:#d32f2f;font-weight:bold;'>${qty} ${unit}</span> for <span style='color:#388e3c;font-weight:bold;'>₹${totalValue}</span>.<br>Phone: <span style='color:#b71c1c;font-weight:bold;'>${phone}</span>`;
+              confirmModal.style.display = 'block';
+            } else {
+              alert('Error saving order');
+            }
+          } catch (error) {
+            alert('Network error - make sure backend is running');
+          }
+        };
+      });
+
+      document.getElementById('closeConfirm').onclick = () => {
+        document.getElementById('confirmModal').style.display = 'none';
+      };
+      document.getElementById('closeConfirmBtn').onclick = () => {
+        document.getElementById('confirmModal').style.display = 'none';
+      };
+
+      const backHomeBtn = document.getElementById('backHomeBtn');
+      function hideHomepage() {
+        document.getElementById('homepageContent').style.display = 'none';
+        backHomeBtn.style.display = 'inline-block';
+      }
+      function showHomepage() {
+        document.getElementById('homepageContent').style.display = '';
+        backHomeBtn.style.display = 'none';
+        productsArea.innerHTML = '';
+      }
+
+      document.getElementById('muttonBtn').onclick = () => { hideHomepage(); showProducts('mutton'); };
+      document.getElementById('chickenBtn').onclick = () => { hideHomepage(); showProducts('chicken'); };
+      backHomeBtn.onclick = showHomepage;
     });
 
-    document.getElementById('closeConfirm').onclick = () => {
-      document.getElementById('confirmModal').style.display = 'none';
-    };
-    document.getElementById('closeConfirmBtn').onclick = () => {
-      document.getElementById('confirmModal').style.display = 'none';
-    };
+    // Payment popup logic using backend URL
+    let pendingOrderData = null;
 
-    const backHomeBtn = document.getElementById('backHomeBtn');
-    function hideHomepage() {
-      document.getElementById('homepageContent').style.display = 'none';
-      backHomeBtn.style.display = 'inline-block';
-    }
-    function showHomepage() {
-      document.getElementById('homepageContent').style.display = '';
-      backHomeBtn.style.display = 'none';
-      productsArea.innerHTML = '';
+    function openPaymentPopup(orderData) {
+      pendingOrderData = orderData;
+      document.getElementById('pay-amount').textContent = orderData.total_price;
+      document.getElementById('payment-overlay').style.display = 'flex';
     }
 
-    document.getElementById('muttonBtn').onclick = () => { hideHomepage(); showProducts('mutton'); };
-    document.getElementById('chickenBtn').onclick = () => { hideHomepage(); showProducts('chicken'); };
-    backHomeBtn.onclick = showHomepage;
-  });
-  let pendingOrderData = null;
+    document.getElementById('btn-cancel-payment').onclick = () => {
+      pendingOrderData = null;
+      document.getElementById('payment-overlay').style.display = 'none';
+    };
 
-function openPaymentPopup(orderData) {
-  pendingOrderData = orderData;
-  document.getElementById('pay-amount').textContent = orderData.total_price;
-  document.getElementById('payment-overlay').style.display = 'flex';
-}
+    document.getElementById('btn-paid').onclick = async () => {
+      if (!pendingOrderData) return;
 
-document.getElementById('btn-cancel-payment').onclick = () => {
-  pendingOrderData = null;
-  document.getElementById('payment-overlay').style.display = 'none';
-};
+      const ref = document.getElementById('upi-ref').value.trim();
+      pendingOrderData.upi_reference = ref;
+      pendingOrderData.latitude = userLocation.latitude;
+      pendingOrderData.longitude = userLocation.longitude;
+      pendingOrderData.address = userLocation.address;
 
-document.getElementById('btn-paid').onclick = async () => {
-  if (!pendingOrderData) return;
+      const res = await fetch(`${API_BASE}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pendingOrderData)
+      });
+      const data = await res.json().catch(() => ({}));
+      alert(data.message || 'Order placed');
+      document.getElementById('payment-overlay').style.display = 'none';
+      pendingOrderData = null;
+    };
 
-  const ref = document.getElementById('upi-ref').value.trim();
-  pendingOrderData.upi_reference = ref;
-  pendingOrderData.latitude = userLocation.latitude;
-  pendingOrderData.longitude = userLocation.longitude;
-  pendingOrderData.address = userLocation.address;
-
-  const res = await fetch('http://localhost:3000/orders', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(pendingOrderData)
-  });
-  const data = await res.json();
-  alert(data.message || 'Order placed');
-  document.getElementById('payment-overlay').style.display = 'none';
-  pendingOrderData = null;
-};
-const orderData = { product_name, quantity, total_price, phone };
-openPaymentPopup(orderData);
-
+    // Note: You should call openPaymentPopup(orderData) from where you confirm payment,
+    // not at the bottom globally with undefined variables.
   </script>
 </body>
 </html>
